@@ -49,7 +49,9 @@ public class Card {
         this.startDate = startDate;
     }
 
-    Card() {}
+    Card() {
+
+    }
 
     public void calcPrice() {
         price = validity.getBasePrice() * zone.getMultiplier() * discount.getAmount();

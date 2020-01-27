@@ -1,6 +1,7 @@
 package ticketmachine.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,16 +21,16 @@ import ticketmachine.repository.ZoneRepository;
 public class InfoController {
 
     @Autowired
-    ZoneRepository zoneRepository;
+    private ZoneRepository zoneRepository;
 
     @Autowired
-    DiscountRepository discountRepository;
+    private DiscountRepository discountRepository;
 
     @Autowired
-    ValidityRepository validityRepository;
+    private ValidityRepository validityRepository;
 
     @Autowired
-    DurationRepository durationRepository;
+    private DurationRepository durationRepository;
 
     @GetMapping(value = "/zone")
     public ResponseEntity<List<Zone>> getAllZones() {
@@ -49,6 +50,11 @@ public class InfoController {
     @GetMapping(value = "/duration")
     public ResponseEntity<List<Duration>> getAllDurations() {
         return ResponseEntity.ok().body(durationRepository.findAll());
+    }
+
+    @GetMapping(value = "/")
+    public ResponseEntity<?> home() {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
 }

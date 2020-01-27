@@ -30,19 +30,19 @@ import ticketmachine.repository.ZoneRepository;
 public class TicketController {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    TicketRepository ticketRepository;
+    private TicketRepository ticketRepository;
 
     @Autowired
-    ZoneRepository zoneRepository;
+    private ZoneRepository zoneRepository;
 
     @Autowired
-    DiscountRepository discountRepository;
+    private DiscountRepository discountRepository;
 
     @Autowired
-    DurationRepository durationRepository;
+    private DurationRepository durationRepository;
 
     @GetMapping(value = "/ticket/user/{pesel}")
     public ResponseEntity<List<Ticket>> getAllTicketsForUser(@PathVariable String pesel) {

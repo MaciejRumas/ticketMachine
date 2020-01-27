@@ -9,4 +9,5 @@ import ticketmachine.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
     User getByName(String name);
+    User findByLogin(String login);
 }
