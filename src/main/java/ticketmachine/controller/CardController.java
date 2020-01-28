@@ -9,16 +9,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import ticketmachine.model.authentication.RequestStatus;
 import ticketmachine.model.Card;
 import ticketmachine.model.Discount;
 import ticketmachine.model.User;
@@ -49,32 +48,35 @@ public class CardController {
     private ValidityRepository validityRepository;
 
     @GetMapping(value = "/card/user/{pesel}")
-    public ResponseEntity<List<Card>> getAllCardsForUser(@PathVariable String pesel) {
+    public ResponseEntity<?> getAllCardsForUser(@PathVariable String pesel) {
         Optional<User> user = userRepository.findById(pesel);
         if (user.isPresent()) {
             return ResponseEntity.ok().body(cardRepository.findAllByUser(user.get()));
-        } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else
+            return new ResponseEntity<>(new RequestStatus(HttpStatus.NOT_FOUND, "There is no such user with " + pesel + " pesel", "/card/user/{pesel}"), HttpStatus.NOT_FOUND);
     }
 
     @GetMapping(value = "/card/{id}")
-    public ResponseEntity<Card> getCardById(@PathVariable long id) {
+    public ResponseEntity<?> getCardById(@PathVariable long id) {
         Optional<Card> card = cardRepository.findById(id);
         if (card.isPresent()) {
             return ResponseEntity.ok().body(card.get());
-        } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else
+            return new ResponseEntity<>(new RequestStatus(HttpStatus.NOT_FOUND, "Card with " + id + " doesn't exist", "/card/{id}"), HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping(value = "/card/{id}")
-    public ResponseEntity<Void> deleteCardById(@PathVariable long id) {
+    public ResponseEntity<?> deleteCardById(@PathVariable long id) {
         Optional<Card> card = cardRepository.findById(id);
         if (card.isPresent()) {
             cardRepository.delete(card.get());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else
+            return new ResponseEntity<>(new RequestStatus(HttpStatus.NOT_FOUND, "Card with " + id + " doesn't exist", "/card/{id}"), HttpStatus.NOT_FOUND);
     }
 
     @PostMapping(value = "/card")
-    public ResponseEntity<Card> addCardForUser(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> addCardForUser(@RequestBody Map<String, String> body) {
         try {
             Optional<User> user = userRepository.findById(body.get("user_pesel"));
             Optional<Zone> zone = zoneRepository.findById(Long.parseLong(body.get("zone_id")));
@@ -85,14 +87,15 @@ public class CardController {
                 Card card = new Card(user.get(), discount.get(), validity.get(), zone.get(), date);
                 card.calcPrice();
                 return ResponseEntity.ok().body(cardRepository.save(card));
-            } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            } else
+                return new ResponseEntity<>(new RequestStatus(HttpStatus.BAD_REQUEST, "Missing data in body", "/card"), HttpStatus.BAD_REQUEST);
         } catch (ParseException | NumberFormatException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new RequestStatus(HttpStatus.BAD_REQUEST, "Wrong data type in body", "/card"), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping(value = "/card/{id}")
-    public ResponseEntity<Card> updateCardForUser(@PathVariable long id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> updateCardForUser(@PathVariable long id, @RequestBody Map<String, String> body) {
         Optional<Card> card = cardRepository.findById(id);
         if (card.isPresent()) {
             try {
@@ -109,11 +112,13 @@ public class CardController {
                     card.get().setStartDate(date);
                     card.get().calcPrice();
                     return ResponseEntity.ok().body(cardRepository.save(card.get()));
-                } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                } else
+                    return new ResponseEntity<>(new RequestStatus(HttpStatus.BAD_REQUEST, "Missing data in body", "/card"), HttpStatus.BAD_REQUEST);
             } catch (ParseException | NumberFormatException e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(new RequestStatus(HttpStatus.BAD_REQUEST, "Wrong data type in body", "/card"), HttpStatus.BAD_REQUEST);
             }
-        } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else
+            return new ResponseEntity<>(new RequestStatus(HttpStatus.NOT_FOUND, "Card with " + id + " doesn't exist", "/card/{id}"), HttpStatus.NOT_FOUND);
     }
 
 }

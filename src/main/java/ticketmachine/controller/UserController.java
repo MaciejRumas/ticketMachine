@@ -8,11 +8,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import ticketmachine.model.authentication.RequestStatus;
 import ticketmachine.model.User;
-import ticketmachine.model.authentication.AuthenticationRequest;
 import ticketmachine.model.authentication.AuthenticationResponse;
 import ticketmachine.repository.UserRepository;
 import ticketmachine.security.JwtUtil;
@@ -34,18 +34,18 @@ public class UserController {
     private JwtUtil jwtTokenUtil;
 
     @PostMapping(value = "/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) {
-       try {
-           authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getLogin(), authenticationRequest.getPassword()));
-       } catch (BadCredentialsException e) {
-           return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-       }
+    public ResponseEntity<?> createAuthenticationToken(@RequestHeader(value = "Login") String login, @RequestHeader(value = "Password") String password) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login, password));
+        } catch (BadCredentialsException e) {
+            return new ResponseEntity<>(new RequestStatus(HttpStatus.UNAUTHORIZED, "Wrong login or password", "/login"), HttpStatus.UNAUTHORIZED);
+        }
 
-       final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getLogin());
-       final String jwt = jwtTokenUtil.generateToken(userDetails);
-       User user = userRepository.findByLogin(userDetails.getUsername());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(login);
+        final String jwt = jwtTokenUtil.generateToken(userDetails);
+        User user = userRepository.findByLogin(userDetails.getUsername());
 
-       return ResponseEntity.ok(new AuthenticationResponse(jwt, user));
+        return ResponseEntity.ok(new AuthenticationResponse(jwt, user));
     }
 
 }
