@@ -36,6 +36,14 @@ public class Zone {
     @JsonBackReference
     private Set<Card> cards = new HashSet<>();
 
+    public Zone(@NotNull double multiplier, @NotNull String name) {
+        this.multiplier = multiplier;
+        this.name = name;
+    }
+
+    public Zone() {
+    }
+
     public double getMultiplier() {
         return multiplier;
     }

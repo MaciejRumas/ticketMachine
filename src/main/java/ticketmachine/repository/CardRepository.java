@@ -10,5 +10,5 @@ import ticketmachine.model.User;
 
 @Repository
 public interface CardRepository extends JpaRepository<Card, Long> {
-    List<Card> getAllByUser(User user);
+    List<Card> findAllByUser(User user);
 }

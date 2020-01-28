@@ -46,6 +46,18 @@ public class User implements UserDetails{
     @JsonBackReference
     private Set<Card> cards = new HashSet<>();
 
+    public User(String user_pesel, @NotNull String login, @NotNull String password, @NotNull String name, @NotNull String secondName) {
+        this.user_pesel = user_pesel;
+        this.login = login;
+        this.password = password;
+        this.name = name;
+        this.secondName = secondName;
+    }
+
+    public User() {
+
+    }
+
     public Set<Ticket> getTickets() {
         return tickets;
     }

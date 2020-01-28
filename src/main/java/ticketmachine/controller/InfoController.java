@@ -1,7 +1,6 @@
 package ticketmachine.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,10 +50,4 @@ public class InfoController {
     public ResponseEntity<List<Duration>> getAllDurations() {
         return ResponseEntity.ok().body(durationRepository.findAll());
     }
-
-    @GetMapping(value = "/")
-    public ResponseEntity<?> home() {
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-
 }

@@ -47,7 +47,7 @@ public class TicketController {
     @GetMapping(value = "/ticket/user/{pesel}")
     public ResponseEntity<List<Ticket>> getAllTicketsForUser(@PathVariable String pesel) {
         Optional<User> user = userRepository.findById(pesel);
-        if(user.isPresent()) {
+        if (user.isPresent()) {
             return ResponseEntity.ok().body(ticketRepository.findAllByUser(user.get()));
         } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -55,7 +55,7 @@ public class TicketController {
     @GetMapping(value = "/ticket/{id}")
     public ResponseEntity<Ticket> getTicketById(@PathVariable long id) {
         Optional<Ticket> ticket = ticketRepository.findById(id);
-        if(ticket.isPresent()) {
+        if (ticket.isPresent()) {
             return ResponseEntity.ok().body(ticket.get());
         } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -63,7 +63,7 @@ public class TicketController {
     @DeleteMapping(value = "/ticket/{id}")
     public ResponseEntity<Void> deleteTicketById(@PathVariable long id) {
         Optional<Ticket> ticket = ticketRepository.findById(id);
-        if(ticket.isPresent()) {
+        if (ticket.isPresent()) {
             ticketRepository.delete(ticket.get());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -71,34 +71,42 @@ public class TicketController {
 
     @PostMapping(value = "/ticket")
     public ResponseEntity<Ticket> addTicketForUser(@RequestBody Map<String, String> body) {
-        Optional<User> user = userRepository.findById(body.get("user_pesel"));
-        Optional<Zone> zone = zoneRepository.findById(Long.parseLong(body.get("zone_id")));
-        Optional<Discount> discount = discountRepository.findById(Long.parseLong(body.get("discount_id")));
-        Optional<Duration> duration = durationRepository.findById(Long.parseLong(body.get("duration_id")));
-        if(user.isPresent() && zone.isPresent() && discount.isPresent() && duration.isPresent()){
-            Ticket ticket = new Ticket(user.get(), zone.get(), discount.get(), duration.get());
-            ticket.calcPrice();
-            return ResponseEntity.ok().body(ticketRepository.save(ticket));
-        } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        try {
+            Optional<User> user = userRepository.findById(body.get("user_pesel"));
+            Optional<Zone> zone = zoneRepository.findById(Long.parseLong(body.get("zone_id")));
+            Optional<Discount> discount = discountRepository.findById(Long.parseLong(body.get("discount_id")));
+            Optional<Duration> duration = durationRepository.findById(Long.parseLong(body.get("duration_id")));
+            if (user.isPresent() && zone.isPresent() && discount.isPresent() && duration.isPresent()) {
+                Ticket ticket = new Ticket(user.get(), zone.get(), discount.get(), duration.get());
+                ticket.calcPrice();
+                return ResponseEntity.ok().body(ticketRepository.save(ticket));
+            } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (NumberFormatException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping(value = "/ticket/{id}")
     public ResponseEntity<Ticket> updateTicketForUser(@PathVariable long id, @RequestBody Map<String, String> body) {
-        Optional<User> user = userRepository.findById(body.get("user_pesel"));
-        Optional<Zone> zone = zoneRepository.findById(Long.parseLong(body.get("zone_id")));
-        Optional<Discount> discount = discountRepository.findById(Long.parseLong(body.get("discount_id")));
-        Optional<Duration> duration = durationRepository.findById(Long.parseLong(body.get("duration_id")));
-        if(user.isPresent() && zone.isPresent() && discount.isPresent() && duration.isPresent()){
-            Optional<Ticket> ticket = ticketRepository.findById(id);
-            if (ticket.isPresent()) {
-                ticket.get().setUser(user.get());
-                ticket.get().setZone(zone.get());
-                ticket.get().setDiscount(discount.get());
-                ticket.get().setDuration(duration.get());
-                ticket.get().calcPrice();
-                return ResponseEntity.ok().body(ticketRepository.save(ticket.get()));
-            } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        Optional<Ticket> ticket = ticketRepository.findById(id);
+        if (ticket.isPresent()) {
+            try {
+                Optional<User> user = userRepository.findById(body.get("user_pesel"));
+                Optional<Zone> zone = zoneRepository.findById(Long.parseLong(body.get("zone_id")));
+                Optional<Discount> discount = discountRepository.findById(Long.parseLong(body.get("discount_id")));
+                Optional<Duration> duration = durationRepository.findById(Long.parseLong(body.get("duration_id")));
+                if (user.isPresent() && zone.isPresent() && discount.isPresent() && duration.isPresent()) {
+                    ticket.get().setUser(user.get());
+                    ticket.get().setZone(zone.get());
+                    ticket.get().setDiscount(discount.get());
+                    ticket.get().setDuration(duration.get());
+                    ticket.get().calcPrice();
+                    return ResponseEntity.ok().body(ticketRepository.save(ticket.get()));
+                } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            } catch (NumberFormatException e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
 }
